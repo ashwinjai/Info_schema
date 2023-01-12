@@ -1,0 +1,90 @@
+Use master
+Go;
+
+Select * from dbo.Media_Rating
+
+--/ Standarizing the Records --/
+
+With Standard_cte AS
+( Select *, 
+  ROW_NUMBER() OVER(Partition by Category,[Average Rating],[Name of Person] Order by [Average Rating],[Name of Person]) as Row_Num,
+          Case[Title Type]
+		  When 'TVEPISODE' Then 'TV_Series'
+		  When 'TVSERIES'  Then 'TV_Series'
+		  When 'VIDEO'     Then 'Movie'
+		  When 'MOVIE'     Then 'Movie'
+		  When 'SHORT'     Then 'Short_Movie'
+		  When 'TVMOVIE'   Then 'Movie'
+		  Else ' '
+		  End as Title_Type
+		  From dbo.Media_Rating 
+		  CROSS APPLY STRING_Split(Media_Rating.Genres,',')Genre
+		  )
+		  Select * Into Media_Rate1  from Standard_cte Where Row_Num =1
+
+--/Finding Top Actor in Each Category/--
+
+With Top_Actor AS(
+          Select TOP 3 [Name of Person],Category,[Average Rating] From Media_Rate1
+		  Where Category = 'ACTOR' And [Average Rating] >= 6.0),
+	 Top_ACTRESS AS
+	       (Select TOP 3 [Name of Person],Category,[Average Rating] From Media_Rate1
+		     Where Category = 'ACTRESS' And [Average Rating] >= 6.0),
+	 Top_ARCHIVE_FOOTAGE AS
+	       (Select TOP 3 [Name of Person],Category,[Average Rating] From Media_Rate1
+		     Where Category = 'ARCHIVE_FOOTAGE' And [Average Rating] >= 6.0),
+     Top_CINEMATOGRAPHER AS
+	       (Select TOP 3 [Name of Person],Category,[Average Rating] From Media_Rate1
+		     Where Category = 'CINEMATOGRAPHER' And [Average Rating] >= 6.0),
+	 Top_COMPOSER AS
+	       (Select TOP 3 [Name of Person],Category,[Average Rating] From Media_Rate1
+		     Where Category = 'COMPOSER' And [Average Rating] >= 6.0),
+     Top_DIRECTOR AS
+	       (Select TOP 3 [Name of Person],Category,[Average Rating] From Media_Rate1
+		     Where Category = 'DIRECTOR' And [Average Rating] >= 6.0),
+     Top_EDITOR AS
+	       (Select TOP 3 [Name of Person],Category,[Average Rating] From Media_Rate1
+		     Where Category = 'EDITOR' And [Average Rating] >= 6.0),
+     Top_PRODUCER AS
+	       (Select TOP 3 [Name of Person],Category,[Average Rating] From Media_Rate1
+		     Where Category = 'PRODUCER' And [Average Rating] >= 6.0),
+     Top_PRODUCTION_DESIGNER AS
+	       (Select TOP 3 [Name of Person],Category,[Average Rating] From Media_Rate1
+		     Where Category = 'PRODUCTION_DESIGNER' And [Average Rating] >= 6.0),
+     Top_SELF AS
+	       (Select TOP 3 [Name of Person],Category,[Average Rating] From Media_Rate1
+		     Where Category = 'SELF' And [Average Rating] >= 6.0),
+	 Top_WRITER AS
+	       (Select TOP 3 [Name of Person],Category,[Average Rating] From Media_Rate1
+		     Where Category = 'WRITER' And [Average Rating] >= 6.0),
+	 Container AS
+	       (SELECT * FROM Top_Actor
+		Union  
+	    SELECT * FROM Top_ACTRESS
+		Union  
+	    SELECT * FROM Top_ACTRESS
+		Union  
+	    SELECT * FROM Top_ARCHIVE_FOOTAGE
+		Union  
+	    SELECT * FROM Top_CINEMATOGRAPHER
+		Union  
+	    SELECT * FROM Top_COMPOSER
+		Union  
+	    SELECT * FROM Top_EDITOR
+		Union  
+	    SELECT * FROM Top_PRODUCER
+		Union  
+	    SELECT * FROM Top_PRODUCTION_DESIGNER
+		Union  
+	    SELECT * FROM Top_SELF
+		Union  
+	    SELECT * FROM Top_WRITER)
+		   Select * into Media_Rate2 From Container
+		   Order by 2,3 desc
+
+Select Distinct Category from testA 
+MINUS
+Select Distinct Category from Media_Rating
+
+--\ Above states that Category such as ARCHIVE_FOOTAGE,DIRECTOR,PRODUCTION_DESIGNER---\
+---\ doesn't have Average Rating of 6.0 & above ---\  
