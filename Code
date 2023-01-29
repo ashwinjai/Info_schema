@@ -83,5 +83,3 @@ Select Distinct Category from testA
 MINUS
 Select Distinct Category from Media_Rating
 
---\ Above states that Category such as ARCHIVE_FOOTAGE,DIRECTOR,PRODUCTION_DESIGNER---\
----\ doesn't have Average Rating of 6.0 & above ---\  
